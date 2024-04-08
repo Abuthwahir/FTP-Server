@@ -1,0 +1,48 @@
+.DATA 
+A: .WORD 1,2,3,4,5,6,7,8,9
+
+B: .WORD 1,2,3,4,5,6,7,8,9
+
+MUL: .WORD 
+.TEXT
+
+LDR R0,=A
+LDR R1,=B
+LDR R2,=MUL
+MOV R3,#0
+MOV R4,#0
+MOV R5,#0
+MOV R6,#3
+MOV R7,#4
+MOV R12,#0
+LOOP:MLA R8,R3,R6,R5
+     MLA R9,R5,R6,R4
+	 MLA R10,R8,R7,R0
+	 MLA R11,R9,R7,R1
+	 LDR R8,[R10]
+	 LDR R9,[R11]
+	 MLA R12,R8,R9,R12
+	 
+	 ADD R5,R5,#1
+	 CMP R5,#3
+	 BLEQ J
+	 B LOOP
+J:  ADD R4,R4,#1
+	MOV R5,#0
+	STR R12,[R2],#4
+	MOV R12,#0
+	CMP R4,#3
+	BLEQ I
+	B LOOP
+I: ADD R3,R3,#1
+   MOV R4,#0
+   CMP R3,#3
+   BEQ END
+   MOV PC,LR
+END: SWI 0X011
+   
+	
+	 
+
+	  
+	 

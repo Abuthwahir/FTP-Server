@@ -1,0 +1,24 @@
+ion
+    ssl_conn = ssl_context.wrap_socket(conn, server_side=True)
+
+    try:
+        # Continuously receive commands from the client
+        while True:
+            # Receive data and decode it into a string
+            command = ssl_conn.recv(1024).decode()
+            print(f'Received command: {command}')
+
+            # Handle different commands from the client
+            if command.lower() == 'quit':
+                # Exit the loop to disconnect the client
+                break
+            elif command.lower() == 'list':
+                # Get list of files in the current directory
+                file_list = '\n'.join(os.listdir())
+                # Encode the list and send it to the client
+                ssl_conn.sendall(file_list.encode())
+            elif command.lower().startswith('dwld'):
+                # Extract filename from the download command
+                filename = command[5:].strip()
+                # Check if the file exists
+                if filename in os.listdi

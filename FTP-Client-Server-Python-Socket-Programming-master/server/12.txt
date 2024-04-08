@@ -1,0 +1,85 @@
+# Import necessary libraries
+import socket
+import os
+import ssl
+
+# Define server address and port
+HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+PORT = 2121        # Port to listen on (non-privileged ports are > 1023)
+
+# Create an SSL context with client authentication
+ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+ssl_context.load_cert_chain(certfile="server.crt", keyfile="server.key")
+
+# Create a TCP socket
+serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Bind the socket to the address and port
+serverSocket.bind((HOST, PORT))
+
+# Listen for incoming connections
+serverSocket.listen()
+
+# Print a message indicating the server is listening
+print(f'Server listening on {HOST}:{PORT}')
+
+# Continuously listen for connections
+while True:
+    # Accept a new connection and get the client's address
+    conn, addr = serverSocket.accept()
+    print(f'Connected with: {addr}')
+
+    # Wrap the connection with SSL for secure communication
+    ssl_conn = ssl_context.wrap_socket(conn, server_side=True)
+
+    try:
+        # Continuously receive commands from the client
+        while True:
+            # Receive data and decode it into a string
+            command = ssl_conn.recv(1024).decode()
+            print(f'Received command: {command}')
+
+            # Handle different commands from the client
+            if command.lower() == 'quit':
+                # Exit the loop to disconnect the client
+                break
+            elif command.lower() == 'list':
+                # Get list of files in the current directory
+                file_list = '\n'.join(os.listdir())
+                # Encode the list and send it to the client
+                ssl_conn.sendall(file_list.encode())
+            elif command.lower().startswith('dwld'):
+                # Extract filename from the download command
+                filename = command[5:].strip()
+                # Check if the file exists
+                if filename in os.listdir():
+                    # Open the file in binary mode for reading
+                    with open(filename, 'rb') as file:
+                        # Read the file contents
+                        file_data = file.read()
+                        # Send the file data to the client
+                        ssl_conn.sendall(file_data)
+                else:
+                    # Send a message indicating file not found
+                    ssl_conn.sendall(f'File "{filename}" not found'.encode())
+            elif command.lower().startswith('upload'):
+                # Extract filename from the upload command
+                filename = command[7:].strip()
+                # Receive data from the client
+                file_data = ssl_conn.recv(1024)
+                # Open the file in binary mode for writing
+                with open(filename, 'wb') as file:
+                    # Write the received data to the file
+                    file.write(file_data)
+                # Send a success message to the client
+                ssl_conn.sendall(f'File "{filename}" uploaded successfully'.encode())
+            else:
+                # Send a message for invalid commands
+                ssl_conn.sendall('Invalid command'.encode())
+
+    finally:
+        # Ensure the secure connection is closed
+        ssl_conn.close()
+
+# Close the server socket
+serverSocket.close()

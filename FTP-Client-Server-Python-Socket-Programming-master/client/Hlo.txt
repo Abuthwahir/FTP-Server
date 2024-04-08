@@ -1,0 +1,37 @@
+import socket
+import os
+import random
+
+# a function that prints current directory relative to 'main'
+def printRelativePath():
+    path = os.getcwd()
+    if path.endswith('main'):
+        return '/'
+    else:
+        pos = path.index('main')
+        return path[pos+5:]
+
+# a function that print files in the directory
+def ListItems():
+    with os.scandir() as items:
+        res =''
+        totalSize=0
+        for item in items:
+            if item.is_file():
+                size = item.stat().st_size
+                res += f'{item.name} \t {size}b \n'
+                totalSize +=size
+            elif item.is_dir():
+                res += f'> {item.name} \n'
+        res += f'total size: {totalSize}b \n'
+        return res
+
+# a function that downloads a file or image from server 
+# and save it in current directory
+def downloadFile(connection,data):
+    found =0
+    path = os.getcwd()
+    fileName = data[5:]
+    if 'main' in path:
+        items = os.scandir()
+        for item in 

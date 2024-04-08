@@ -1,0 +1,34 @@
+hi everyone....
+it is good to se you =)
+how is it going?
+what are you going to do?
+certfile_path = 'Users/abhijeetkumar/Desktop/sem 4/CN/FTP-Client-Server-Python-Socket-Programming-master/certificate.pem'
+keyfile_path = 'Users/abhijeetkumar/Desktop/sem 4/CN/FTP-Client-Server-Python-Socket-Programming-master/private_key.pem'
+import socket
+import ssl
+import os
+import random
+
+def printRelativePath():
+    path = os.getcwd()
+    if path.endswith('main'):
+        return '/'
+    else:
+        pos = path.index('main')
+        return path[pos + 5:]
+
+def ListItems():
+    try:
+        with os.scandir() as items:
+            res = ''
+            totalSize = 0
+            for item in items:
+                if item.is_file():
+                    size = item.stat().st_size
+                    res += f'{item.name} \t {size}b \n'
+                    totalSize += size
+                elif item.is_dir():
+                    res += f'> {item.name} \n'
+            res += f'total size: {totalSize}b \n'
+            return res
+    e

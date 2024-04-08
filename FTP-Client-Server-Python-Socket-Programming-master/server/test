@@ -1,0 +1,39 @@
+# it is a test???
+# my favorite books:
+# my favorite movies:
+# my favorite sports:
+#my hobbies?
+import socket
+import os
+
+HOST = '127.0.0.1'
+PORT = 2121
+
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+clientSocket.connect((HOST, PORT))
+
+# Read the contents of the certificate and private key files
+with open('csr.pem', 'r') as csr_file:
+    csr_content = csr_file.read()
+
+with open('Certificate.pem', 'r') as cert_file:
+    cert_content = cert_file.read()
+
+with open('Private_key.pem', 'r') as key_file:
+    key_content = key_file.read()
+
+while True:
+    command = input('Enter your command: ')
+    clientSocket.sendall(command.encode())
+
+    if command.lower() == 'quit':
+        break
+
+    data = clientSocket.recv(1024).decode()
+
+    if command.startswith('dwld') and data != 'Bad Request....\nWrong Command!!...':
+        # Establish a new socket for file transfer
+        clientSocket2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        clientSocket2.connect((HOST, int(data)))
+
+        # Extr
